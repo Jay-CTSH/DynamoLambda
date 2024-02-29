@@ -1,0 +1,245 @@
+{
+  "version": "36.0.0",
+  "artifacts": {
+    "cdk-lambda-cron-example.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "cdk-lambda-cron-example.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "cdk-lambda-cron-example": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://unknown-account/unknown-region",
+      "properties": {
+        "templateFile": "cdk-lambda-cron-example.template.json",
+        "terminationProtection": false,
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-${AWS::Region}",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-cfn-exec-role-${AWS::AccountId}-${AWS::Region}",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}/96a497720f02cf61d62cb4556059d5895f8a8fa45047a5918e095e037f3b25df.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "cdk-lambda-cron-example.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-lookup-role-${AWS::AccountId}-${AWS::Region}",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "cdk-lambda-cron-example.assets"
+      ],
+      "metadata": {
+        "/cdk-lambda-cron-example/MyDynamoDBTable/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MyDynamoDBTableC2A56241"
+          }
+        ],
+        "/cdk-lambda-cron-example/CrudLambdaFunction/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CrudLambdaFunctionServiceRoleB6CA2091"
+          }
+        ],
+        "/cdk-lambda-cron-example/CrudLambdaFunction/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CrudLambdaFunctionServiceRoleDefaultPolicy8938D7E9"
+          }
+        ],
+        "/cdk-lambda-cron-example/CrudLambdaFunction/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CrudLambdaFunctionC2A29CD8"
+          }
+        ],
+        "/cdk-lambda-cron-example/StreamProcessorLambdaFunction/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "StreamProcessorLambdaFunctionServiceRoleA9ECAEF0"
+          }
+        ],
+        "/cdk-lambda-cron-example/StreamProcessorLambdaFunction/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "StreamProcessorLambdaFunctionServiceRoleDefaultPolicyA8946356"
+          }
+        ],
+        "/cdk-lambda-cron-example/StreamProcessorLambdaFunction/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "StreamProcessorLambdaFunction73AD3945"
+          }
+        ],
+        "/cdk-lambda-cron-example/StreamProcessorLambdaFunction/DynamoDBEventSource:cdklambdacronexampleMyDynamoDBTableFE8AFF85/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "StreamProcessorLambdaFunctionDynamoDBEventSourcecdklambdacronexampleMyDynamoDBTableFE8AFF8503053E12"
+          }
+        ],
+        "/cdk-lambda-cron-example/MyAPI/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MyAPI5C779B6E"
+          }
+        ],
+        "/cdk-lambda-cron-example/MyAPI/CloudWatchRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MyAPICloudWatchRole2982FFAE"
+          }
+        ],
+        "/cdk-lambda-cron-example/MyAPI/Account": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MyAPIAccount3A52C897"
+          }
+        ],
+        "/cdk-lambda-cron-example/MyAPI/Deployment/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MyAPIDeployment1F3E49D4f10159d7f86cddcf0383e68e122b1a8f"
+          }
+        ],
+        "/cdk-lambda-cron-example/MyAPI/DeploymentStage.prod/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MyAPIDeploymentStageprod174C03F0"
+          }
+        ],
+        "/cdk-lambda-cron-example/MyAPI/Endpoint": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MyAPIEndpoint3D9AE6B4"
+          }
+        ],
+        "/cdk-lambda-cron-example/MyAPI/Default/crud/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MyAPIcrudF58370DA"
+          }
+        ],
+        "/cdk-lambda-cron-example/MyAPI/Default/crud/GET/ApiPermission.cdklambdacronexampleMyAPIE97BDEE4.GET..crud": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MyAPIcrudGETApiPermissioncdklambdacronexampleMyAPIE97BDEE4GETcrud16125956"
+          }
+        ],
+        "/cdk-lambda-cron-example/MyAPI/Default/crud/GET/ApiPermission.Test.cdklambdacronexampleMyAPIE97BDEE4.GET..crud": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MyAPIcrudGETApiPermissionTestcdklambdacronexampleMyAPIE97BDEE4GETcrudA4995066"
+          }
+        ],
+        "/cdk-lambda-cron-example/MyAPI/Default/crud/GET/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MyAPIcrudGETD85CBB68"
+          }
+        ],
+        "/cdk-lambda-cron-example/MyAPI/Default/crud/POST/ApiPermission.cdklambdacronexampleMyAPIE97BDEE4.POST..crud": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MyAPIcrudPOSTApiPermissioncdklambdacronexampleMyAPIE97BDEE4POSTcrud4A63CA6F"
+          }
+        ],
+        "/cdk-lambda-cron-example/MyAPI/Default/crud/POST/ApiPermission.Test.cdklambdacronexampleMyAPIE97BDEE4.POST..crud": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MyAPIcrudPOSTApiPermissionTestcdklambdacronexampleMyAPIE97BDEE4POSTcrud7B31932C"
+          }
+        ],
+        "/cdk-lambda-cron-example/MyAPI/Default/crud/POST/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MyAPIcrudPOST39B05944"
+          }
+        ],
+        "/cdk-lambda-cron-example/MyAPI/Default/crud/{id}/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MyAPIcrudid7211E044"
+          }
+        ],
+        "/cdk-lambda-cron-example/MyAPI/Default/crud/{id}/GET/ApiPermission.cdklambdacronexampleMyAPIE97BDEE4.GET..crud.{id}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MyAPIcrudidGETApiPermissioncdklambdacronexampleMyAPIE97BDEE4GETcrudidA6CB94DB"
+          }
+        ],
+        "/cdk-lambda-cron-example/MyAPI/Default/crud/{id}/GET/ApiPermission.Test.cdklambdacronexampleMyAPIE97BDEE4.GET..crud.{id}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MyAPIcrudidGETApiPermissionTestcdklambdacronexampleMyAPIE97BDEE4GETcrudid0B03DCD3"
+          }
+        ],
+        "/cdk-lambda-cron-example/MyAPI/Default/crud/{id}/GET/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MyAPIcrudidGET2D1D20D8"
+          }
+        ],
+        "/cdk-lambda-cron-example/MyAPI/Default/crud/{id}/PUT/ApiPermission.cdklambdacronexampleMyAPIE97BDEE4.PUT..crud.{id}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MyAPIcrudidPUTApiPermissioncdklambdacronexampleMyAPIE97BDEE4PUTcrudidCF54F909"
+          }
+        ],
+        "/cdk-lambda-cron-example/MyAPI/Default/crud/{id}/PUT/ApiPermission.Test.cdklambdacronexampleMyAPIE97BDEE4.PUT..crud.{id}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MyAPIcrudidPUTApiPermissionTestcdklambdacronexampleMyAPIE97BDEE4PUTcrudidFE20831F"
+          }
+        ],
+        "/cdk-lambda-cron-example/MyAPI/Default/crud/{id}/PUT/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MyAPIcrudidPUT59131E6B"
+          }
+        ],
+        "/cdk-lambda-cron-example/MyAPI/Default/crud/{id}/DELETE/ApiPermission.cdklambdacronexampleMyAPIE97BDEE4.DELETE..crud.{id}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MyAPIcrudidDELETEApiPermissioncdklambdacronexampleMyAPIE97BDEE4DELETEcrudid9EC52D77"
+          }
+        ],
+        "/cdk-lambda-cron-example/MyAPI/Default/crud/{id}/DELETE/ApiPermission.Test.cdklambdacronexampleMyAPIE97BDEE4.DELETE..crud.{id}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MyAPIcrudidDELETEApiPermissionTestcdklambdacronexampleMyAPIE97BDEE4DELETEcrudid17120B77"
+          }
+        ],
+        "/cdk-lambda-cron-example/MyAPI/Default/crud/{id}/DELETE/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "MyAPIcrudidDELETE88368C2F"
+          }
+        ],
+        "/cdk-lambda-cron-example/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/cdk-lambda-cron-example/CDKMetadata/Condition": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadataAvailable"
+          }
+        ]
+      },
+      "displayName": "cdk-lambda-cron-example"
+    },
+    "Tree": {
+      "type": "cdk:tree",
+      "properties": {
+        "file": "tree.json"
+      }
+    }
+  }
+}

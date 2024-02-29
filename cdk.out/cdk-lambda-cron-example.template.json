@@ -1,0 +1,1279 @@
+{
+ "Resources": {
+  "MyDynamoDBTableC2A56241": {
+   "Type": "AWS::DynamoDB::Table",
+   "Properties": {
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "id",
+      "AttributeType": "S"
+     }
+    ],
+    "KeySchema": [
+     {
+      "AttributeName": "id",
+      "KeyType": "HASH"
+     }
+    ],
+    "ProvisionedThroughput": {
+     "ReadCapacityUnits": 5,
+     "WriteCapacityUnits": 5
+    },
+    "StreamSpecification": {
+     "StreamViewType": "NEW_IMAGE"
+    }
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "cdk-lambda-cron-example/MyDynamoDBTable/Resource"
+   }
+  },
+  "CrudLambdaFunctionServiceRoleB6CA2091": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "cdk-lambda-cron-example/CrudLambdaFunction/ServiceRole/Resource"
+   }
+  },
+  "CrudLambdaFunctionServiceRoleDefaultPolicy8938D7E9": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:Query",
+        "dynamodb:GetItem",
+        "dynamodb:Scan",
+        "dynamodb:ConditionCheckItem",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:PutItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:DescribeTable"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "MyDynamoDBTableC2A56241",
+          "Arn"
+         ]
+        },
+        {
+         "Ref": "AWS::NoValue"
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "CrudLambdaFunctionServiceRoleDefaultPolicy8938D7E9",
+    "Roles": [
+     {
+      "Ref": "CrudLambdaFunctionServiceRoleB6CA2091"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "cdk-lambda-cron-example/CrudLambdaFunction/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "CrudLambdaFunctionC2A29CD8": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "deployment-bucket",
+     "S3Key": "lambda/deployment/lambda-dynamodb.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "DYNAMODB_TABLE_NAME": {
+       "Ref": "MyDynamoDBTableC2A56241"
+      }
+     }
+    },
+    "Handler": "com.example.CrudLambdaHandler::handleRequest",
+    "Role": {
+     "Fn::GetAtt": [
+      "CrudLambdaFunctionServiceRoleB6CA2091",
+      "Arn"
+     ]
+    },
+    "Runtime": "java11"
+   },
+   "DependsOn": [
+    "CrudLambdaFunctionServiceRoleDefaultPolicy8938D7E9",
+    "CrudLambdaFunctionServiceRoleB6CA2091"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "cdk-lambda-cron-example/CrudLambdaFunction/Resource"
+   }
+  },
+  "StreamProcessorLambdaFunctionServiceRoleA9ECAEF0": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "cdk-lambda-cron-example/StreamProcessorLambdaFunction/ServiceRole/Resource"
+   }
+  },
+  "StreamProcessorLambdaFunctionServiceRoleDefaultPolicyA8946356": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "dynamodb:ListStreams",
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": [
+        "dynamodb:DescribeStream",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "MyDynamoDBTableC2A56241",
+         "StreamArn"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "StreamProcessorLambdaFunctionServiceRoleDefaultPolicyA8946356",
+    "Roles": [
+     {
+      "Ref": "StreamProcessorLambdaFunctionServiceRoleA9ECAEF0"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "cdk-lambda-cron-example/StreamProcessorLambdaFunction/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "StreamProcessorLambdaFunction73AD3945": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "deployment-bucket",
+     "S3Key": "lambda/deployment/dynamodb-lambda.zip"
+    },
+    "Handler": "com.example.StreamProcessorLambdaHandler::handleRequest",
+    "Role": {
+     "Fn::GetAtt": [
+      "StreamProcessorLambdaFunctionServiceRoleA9ECAEF0",
+      "Arn"
+     ]
+    },
+    "Runtime": "java11"
+   },
+   "DependsOn": [
+    "StreamProcessorLambdaFunctionServiceRoleDefaultPolicyA8946356",
+    "StreamProcessorLambdaFunctionServiceRoleA9ECAEF0"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "cdk-lambda-cron-example/StreamProcessorLambdaFunction/Resource"
+   }
+  },
+  "StreamProcessorLambdaFunctionDynamoDBEventSourcecdklambdacronexampleMyDynamoDBTableFE8AFF8503053E12": {
+   "Type": "AWS::Lambda::EventSourceMapping",
+   "Properties": {
+    "BatchSize": 10,
+    "EventSourceArn": {
+     "Fn::GetAtt": [
+      "MyDynamoDBTableC2A56241",
+      "StreamArn"
+     ]
+    },
+    "FunctionName": {
+     "Ref": "StreamProcessorLambdaFunction73AD3945"
+    },
+    "StartingPosition": "LATEST"
+   },
+   "Metadata": {
+    "aws:cdk:path": "cdk-lambda-cron-example/StreamProcessorLambdaFunction/DynamoDBEventSource:cdklambdacronexampleMyDynamoDBTableFE8AFF85/Resource"
+   }
+  },
+  "MyAPI5C779B6E": {
+   "Type": "AWS::ApiGateway::RestApi",
+   "Properties": {
+    "Name": "MyAPI"
+   },
+   "Metadata": {
+    "aws:cdk:path": "cdk-lambda-cron-example/MyAPI/Resource"
+   }
+  },
+  "MyAPICloudWatchRole2982FFAE": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "apigateway.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+       ]
+      ]
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "cdk-lambda-cron-example/MyAPI/CloudWatchRole/Resource"
+   }
+  },
+  "MyAPIAccount3A52C897": {
+   "Type": "AWS::ApiGateway::Account",
+   "Properties": {
+    "CloudWatchRoleArn": {
+     "Fn::GetAtt": [
+      "MyAPICloudWatchRole2982FFAE",
+      "Arn"
+     ]
+    }
+   },
+   "DependsOn": [
+    "MyAPI5C779B6E"
+   ],
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "cdk-lambda-cron-example/MyAPI/Account"
+   }
+  },
+  "MyAPIDeployment1F3E49D4f10159d7f86cddcf0383e68e122b1a8f": {
+   "Type": "AWS::ApiGateway::Deployment",
+   "Properties": {
+    "Description": "Automatically created by the RestApi construct",
+    "RestApiId": {
+     "Ref": "MyAPI5C779B6E"
+    }
+   },
+   "DependsOn": [
+    "MyAPIcrudidDELETE88368C2F",
+    "MyAPIcrudidGET2D1D20D8",
+    "MyAPIcrudidPUT59131E6B",
+    "MyAPIcrudid7211E044",
+    "MyAPIcrudGETD85CBB68",
+    "MyAPIcrudPOST39B05944",
+    "MyAPIcrudF58370DA"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "cdk-lambda-cron-example/MyAPI/Deployment/Resource"
+   }
+  },
+  "MyAPIDeploymentStageprod174C03F0": {
+   "Type": "AWS::ApiGateway::Stage",
+   "Properties": {
+    "DeploymentId": {
+     "Ref": "MyAPIDeployment1F3E49D4f10159d7f86cddcf0383e68e122b1a8f"
+    },
+    "RestApiId": {
+     "Ref": "MyAPI5C779B6E"
+    },
+    "StageName": "prod"
+   },
+   "DependsOn": [
+    "MyAPIAccount3A52C897"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "cdk-lambda-cron-example/MyAPI/DeploymentStage.prod/Resource"
+   }
+  },
+  "MyAPIcrudF58370DA": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Fn::GetAtt": [
+      "MyAPI5C779B6E",
+      "RootResourceId"
+     ]
+    },
+    "PathPart": "crud",
+    "RestApiId": {
+     "Ref": "MyAPI5C779B6E"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "cdk-lambda-cron-example/MyAPI/Default/crud/Resource"
+   }
+  },
+  "MyAPIcrudGETApiPermissioncdklambdacronexampleMyAPIE97BDEE4GETcrud16125956": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "CrudLambdaFunctionC2A29CD8",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:",
+       {
+        "Ref": "AWS::Region"
+       },
+       ":",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":",
+       {
+        "Ref": "MyAPI5C779B6E"
+       },
+       "/",
+       {
+        "Ref": "MyAPIDeploymentStageprod174C03F0"
+       },
+       "/GET/crud"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "cdk-lambda-cron-example/MyAPI/Default/crud/GET/ApiPermission.cdklambdacronexampleMyAPIE97BDEE4.GET..crud"
+   }
+  },
+  "MyAPIcrudGETApiPermissionTestcdklambdacronexampleMyAPIE97BDEE4GETcrudA4995066": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "CrudLambdaFunctionC2A29CD8",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:",
+       {
+        "Ref": "AWS::Region"
+       },
+       ":",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":",
+       {
+        "Ref": "MyAPI5C779B6E"
+       },
+       "/test-invoke-stage/GET/crud"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "cdk-lambda-cron-example/MyAPI/Default/crud/GET/ApiPermission.Test.cdklambdacronexampleMyAPIE97BDEE4.GET..crud"
+   }
+  },
+  "MyAPIcrudGETD85CBB68": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "GET",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":apigateway:",
+        {
+         "Ref": "AWS::Region"
+        },
+        ":lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "CrudLambdaFunctionC2A29CD8",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "MyAPIcrudF58370DA"
+    },
+    "RestApiId": {
+     "Ref": "MyAPI5C779B6E"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "cdk-lambda-cron-example/MyAPI/Default/crud/GET/Resource"
+   }
+  },
+  "MyAPIcrudPOSTApiPermissioncdklambdacronexampleMyAPIE97BDEE4POSTcrud4A63CA6F": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "CrudLambdaFunctionC2A29CD8",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:",
+       {
+        "Ref": "AWS::Region"
+       },
+       ":",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":",
+       {
+        "Ref": "MyAPI5C779B6E"
+       },
+       "/",
+       {
+        "Ref": "MyAPIDeploymentStageprod174C03F0"
+       },
+       "/POST/crud"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "cdk-lambda-cron-example/MyAPI/Default/crud/POST/ApiPermission.cdklambdacronexampleMyAPIE97BDEE4.POST..crud"
+   }
+  },
+  "MyAPIcrudPOSTApiPermissionTestcdklambdacronexampleMyAPIE97BDEE4POSTcrud7B31932C": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "CrudLambdaFunctionC2A29CD8",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:",
+       {
+        "Ref": "AWS::Region"
+       },
+       ":",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":",
+       {
+        "Ref": "MyAPI5C779B6E"
+       },
+       "/test-invoke-stage/POST/crud"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "cdk-lambda-cron-example/MyAPI/Default/crud/POST/ApiPermission.Test.cdklambdacronexampleMyAPIE97BDEE4.POST..crud"
+   }
+  },
+  "MyAPIcrudPOST39B05944": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "POST",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":apigateway:",
+        {
+         "Ref": "AWS::Region"
+        },
+        ":lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "CrudLambdaFunctionC2A29CD8",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "MyAPIcrudF58370DA"
+    },
+    "RestApiId": {
+     "Ref": "MyAPI5C779B6E"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "cdk-lambda-cron-example/MyAPI/Default/crud/POST/Resource"
+   }
+  },
+  "MyAPIcrudid7211E044": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Ref": "MyAPIcrudF58370DA"
+    },
+    "PathPart": "{id}",
+    "RestApiId": {
+     "Ref": "MyAPI5C779B6E"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "cdk-lambda-cron-example/MyAPI/Default/crud/{id}/Resource"
+   }
+  },
+  "MyAPIcrudidGETApiPermissioncdklambdacronexampleMyAPIE97BDEE4GETcrudidA6CB94DB": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "CrudLambdaFunctionC2A29CD8",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:",
+       {
+        "Ref": "AWS::Region"
+       },
+       ":",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":",
+       {
+        "Ref": "MyAPI5C779B6E"
+       },
+       "/",
+       {
+        "Ref": "MyAPIDeploymentStageprod174C03F0"
+       },
+       "/GET/crud/*"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "cdk-lambda-cron-example/MyAPI/Default/crud/{id}/GET/ApiPermission.cdklambdacronexampleMyAPIE97BDEE4.GET..crud.{id}"
+   }
+  },
+  "MyAPIcrudidGETApiPermissionTestcdklambdacronexampleMyAPIE97BDEE4GETcrudid0B03DCD3": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "CrudLambdaFunctionC2A29CD8",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:",
+       {
+        "Ref": "AWS::Region"
+       },
+       ":",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":",
+       {
+        "Ref": "MyAPI5C779B6E"
+       },
+       "/test-invoke-stage/GET/crud/*"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "cdk-lambda-cron-example/MyAPI/Default/crud/{id}/GET/ApiPermission.Test.cdklambdacronexampleMyAPIE97BDEE4.GET..crud.{id}"
+   }
+  },
+  "MyAPIcrudidGET2D1D20D8": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "GET",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":apigateway:",
+        {
+         "Ref": "AWS::Region"
+        },
+        ":lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "CrudLambdaFunctionC2A29CD8",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "MyAPIcrudid7211E044"
+    },
+    "RestApiId": {
+     "Ref": "MyAPI5C779B6E"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "cdk-lambda-cron-example/MyAPI/Default/crud/{id}/GET/Resource"
+   }
+  },
+  "MyAPIcrudidPUTApiPermissioncdklambdacronexampleMyAPIE97BDEE4PUTcrudidCF54F909": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "CrudLambdaFunctionC2A29CD8",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:",
+       {
+        "Ref": "AWS::Region"
+       },
+       ":",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":",
+       {
+        "Ref": "MyAPI5C779B6E"
+       },
+       "/",
+       {
+        "Ref": "MyAPIDeploymentStageprod174C03F0"
+       },
+       "/PUT/crud/*"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "cdk-lambda-cron-example/MyAPI/Default/crud/{id}/PUT/ApiPermission.cdklambdacronexampleMyAPIE97BDEE4.PUT..crud.{id}"
+   }
+  },
+  "MyAPIcrudidPUTApiPermissionTestcdklambdacronexampleMyAPIE97BDEE4PUTcrudidFE20831F": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "CrudLambdaFunctionC2A29CD8",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:",
+       {
+        "Ref": "AWS::Region"
+       },
+       ":",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":",
+       {
+        "Ref": "MyAPI5C779B6E"
+       },
+       "/test-invoke-stage/PUT/crud/*"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "cdk-lambda-cron-example/MyAPI/Default/crud/{id}/PUT/ApiPermission.Test.cdklambdacronexampleMyAPIE97BDEE4.PUT..crud.{id}"
+   }
+  },
+  "MyAPIcrudidPUT59131E6B": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "PUT",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":apigateway:",
+        {
+         "Ref": "AWS::Region"
+        },
+        ":lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "CrudLambdaFunctionC2A29CD8",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "MyAPIcrudid7211E044"
+    },
+    "RestApiId": {
+     "Ref": "MyAPI5C779B6E"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "cdk-lambda-cron-example/MyAPI/Default/crud/{id}/PUT/Resource"
+   }
+  },
+  "MyAPIcrudidDELETEApiPermissioncdklambdacronexampleMyAPIE97BDEE4DELETEcrudid9EC52D77": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "CrudLambdaFunctionC2A29CD8",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:",
+       {
+        "Ref": "AWS::Region"
+       },
+       ":",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":",
+       {
+        "Ref": "MyAPI5C779B6E"
+       },
+       "/",
+       {
+        "Ref": "MyAPIDeploymentStageprod174C03F0"
+       },
+       "/DELETE/crud/*"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "cdk-lambda-cron-example/MyAPI/Default/crud/{id}/DELETE/ApiPermission.cdklambdacronexampleMyAPIE97BDEE4.DELETE..crud.{id}"
+   }
+  },
+  "MyAPIcrudidDELETEApiPermissionTestcdklambdacronexampleMyAPIE97BDEE4DELETEcrudid17120B77": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "CrudLambdaFunctionC2A29CD8",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:",
+       {
+        "Ref": "AWS::Region"
+       },
+       ":",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":",
+       {
+        "Ref": "MyAPI5C779B6E"
+       },
+       "/test-invoke-stage/DELETE/crud/*"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "cdk-lambda-cron-example/MyAPI/Default/crud/{id}/DELETE/ApiPermission.Test.cdklambdacronexampleMyAPIE97BDEE4.DELETE..crud.{id}"
+   }
+  },
+  "MyAPIcrudidDELETE88368C2F": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "AuthorizationType": "NONE",
+    "HttpMethod": "DELETE",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":apigateway:",
+        {
+         "Ref": "AWS::Region"
+        },
+        ":lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "CrudLambdaFunctionC2A29CD8",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "ResourceId": {
+     "Ref": "MyAPIcrudid7211E044"
+    },
+    "RestApiId": {
+     "Ref": "MyAPI5C779B6E"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "cdk-lambda-cron-example/MyAPI/Default/crud/{id}/DELETE/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/22PW0/DMAyFf8ve07CCELxuAx6QJqaNd+QmXjFtLmqcTVXV/06acpvEkz+fHOfY17Is7+VyAedQKN0ULVVyODCoRiTpbdC9BeN0El+halFsjjbDKMKNXEfVIK8hoGjBVBrk8BStYnJ2Mv7w4wktH1zsFG7Be7L19Py/usPOUAhpbBQERg57N8fmunMtqT77Mo0CPNXAeIY+WTHwylN2/+JKKRctiwf0retNCp3UP106t84RM6TRvFS+67v5+nPmLfK705M00zhe+F4i+8gXE4k3zmrifNcznOCqvJNLebv4CERFl/Yjg3I/10/9g3iUlQEAAA=="
+   },
+   "Metadata": {
+    "aws:cdk:path": "cdk-lambda-cron-example/CDKMetadata/Default"
+   },
+   "Condition": "CDKMetadataAvailable"
+  }
+ },
+ "Outputs": {
+  "MyAPIEndpoint3D9AE6B4": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://",
+      {
+       "Ref": "MyAPI5C779B6E"
+      },
+      ".execute-api.",
+      {
+       "Ref": "AWS::Region"
+      },
+      ".",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/",
+      {
+       "Ref": "MyAPIDeploymentStageprod174C03F0"
+      },
+      "/"
+     ]
+    ]
+   }
+  }
+ },
+ "Conditions": {
+  "CDKMetadataAvailable": {
+   "Fn::Or": [
+    {
+     "Fn::Or": [
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "af-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-east-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-northeast-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-northeast-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-southeast-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-southeast-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ca-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "cn-north-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "cn-northwest-1"
+       ]
+      }
+     ]
+    },
+    {
+     "Fn::Or": [
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-north-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-west-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-west-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-west-3"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "il-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "me-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "me-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "sa-east-1"
+       ]
+      }
+     ]
+    },
+    {
+     "Fn::Or": [
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-east-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-east-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-west-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-west-2"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

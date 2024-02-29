@@ -1,0 +1,19 @@
+{
+  "version": "36.0.0",
+  "files": {
+    "96a497720f02cf61d62cb4556059d5895f8a8fa45047a5918e095e037f3b25df": {
+      "source": {
+        "path": "cdk-lambda-cron-example.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "current_account-current_region": {
+          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}",
+          "objectKey": "96a497720f02cf61d62cb4556059d5895f8a8fa45047a5918e095e037f3b25df.json",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-${AWS::Region}"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

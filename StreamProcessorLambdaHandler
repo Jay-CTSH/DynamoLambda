@@ -1,0 +1,17 @@
+package com.aws.dynamolambda;
+
+import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.events.DynamodbEvent;
+
+public class StreamProcessorLambdaHandler {
+
+    public void handleRequest(DynamodbEvent dynamodbEvent, Context context) {
+        for (DynamodbEvent.DynamodbStreamRecord record : dynamodbEvent.getRecords()) {
+            String eventName = record.getEventName();
+            String dynamoDBTableName = record.getEventSourceARN().split("/")[1];
+            
+            context.getLogger().log("Event Name: " + eventName);
+            context.getLogger().log("DynamoDB Table Name: " + dynamoDBTableName);
+        }
+    }
+}

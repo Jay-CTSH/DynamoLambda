@@ -1,0 +1,106 @@
+package com.aws.dynamolambda;
+
+import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
+import com.amazonaws.services.dynamodbv2.document.*;
+import com.amazonaws.services.dynamodbv2.document.Item;
+import java.util.HashMap;
+import java.util.Map;
+
+public class CrudLambdaHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
+
+    private static final String DYNAMODB_TABLE_NAME = System.getenv("DYNAMODB_TABLE_NAME");
+    private static final DynamoDB dynamoDB = new DynamoDB(AmazonDynamoDBClient.builder().build());
+
+    @Override
+    public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
+        String httpMethod = request.getHttpMethod();
+        String itemId = request.getPathParameters().get("id");
+
+        if ("GET".equals(httpMethod)) {
+            return getItem(itemId);
+        } else if ("POST".equals(httpMethod)) {
+            return createItem(request.getBody());
+        } else if ("PUT".equals(httpMethod)) {
+            return updateItem(itemId, request.getBody());
+        } else if ("DELETE".equals(httpMethod)) {
+            return deleteItem(itemId);
+        }
+
+        return new APIGatewayProxyResponseEvent().withStatusCode(400).withBody("Invalid HTTP method");
+    }
+
+    private APIGatewayProxyResponseEvent getItem(String itemId) {
+        try {
+            Item item = dynamoDB.getTable(DYNAMODB_TABLE_NAME).getItem("id", itemId);
+            if (item != null) {
+                return new APIGatewayProxyResponseEvent()
+                        .withStatusCode(200)
+                        .withBody(item.toJSONPretty());
+            } else {
+                return new APIGatewayProxyResponseEvent()
+                        .withStatusCode(404)
+                        .withBody("Item not found");
+            }
+        } catch (Exception e) {
+            return new APIGatewayProxyResponseEvent()
+                    .withStatusCode(500)
+                    .withBody("Error retrieving item: " + e.getMessage());
+        }
+    }
+
+    private APIGatewayProxyResponseEvent createItem(String requestBody) {
+        try {
+            Item item = Item.fromJSON(requestBody);
+            dynamoDB.getTable(DYNAMODB_TABLE_NAME).putItem(item);
+            return new APIGatewayProxyResponseEvent()
+                    .withStatusCode(201)
+                    .withBody("Item created successfully");
+        } catch (Exception e) {
+            return new APIGatewayProxyResponseEvent()
+                    .withStatusCode(500)
+                    .withBody("Error creating item: " + e.getMessage());
+        }
+    }
+
+    private APIGatewayProxyResponseEvent updateItem(String itemId, String requestBody) {
+        try {
+            Item item = Item.fromJSON(requestBody);
+            item.withPrimaryKey("id", itemId);
+            dynamoDB.getTable(DYNAMODB_TABLE_NAME).putItem(item);
+            return new APIGatewayProxyResponseEvent()
+                    .withStatusCode(200)
+                    .withBody("Item updated successfully");
+        } catch (Exception e) {
+            return new APIGatewayProxyResponseEvent()
+                    .withStatusCode(500)
+                    .withBody("Error updating item: " + e.getMessage());
+        }
+    }
+
+    private APIGatewayProxyResponseEvent deleteItem(String itemId) {
+        try {
+            DynamoDB dynamoDBClient = new DynamoDB(AmazonDynamoDBClient.builder().build());
+            Table table = dynamoDBClient.getTable(DYNAMODB_TABLE_NAME);
+
+            // Check if the item exists before attempting to delete
+            Item existingItem = table.getItem("id", itemId);
+            if (existingItem != null) {
+                table.deleteItem("id", itemId);
+                return new APIGatewayProxyResponseEvent()
+                        .withStatusCode(200)
+                        .withBody("Item deleted successfully");
+            } else {
+                return new APIGatewayProxyResponseEvent()
+                        .withStatusCode(404)
+                        .withBody("Item not found");
+            }
+        } catch (Exception e) {
+            return new APIGatewayProxyResponseEvent()
+                    .withStatusCode(500)
+                    .withBody("Error deleting item: " + e.getMessage());
+        }
+    }
+}
